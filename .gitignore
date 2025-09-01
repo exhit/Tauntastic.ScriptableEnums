@@ -74,9 +74,5 @@ crashlytics-build.properties
 # Ignore custom package test files
 Test
 Test.meta
-Test/*Test/FlagsSomeSE.cs
-Test/FlagsSomeSE.cs.meta
-Test/FlagsSomeSE.cs
-Test/SomeSE.cs
-Test/SomeSE.cs.meta
-*.cs
+Test/*
+Test/*.*
