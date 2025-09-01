@@ -70,3 +70,13 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Ignore custom package test files
+Test
+Test.meta
+Test/*Test/FlagsSomeSE.cs
+Test/FlagsSomeSE.cs.meta
+Test/FlagsSomeSE.cs
+Test/SomeSE.cs
+Test/SomeSE.cs.meta
+*.cs
