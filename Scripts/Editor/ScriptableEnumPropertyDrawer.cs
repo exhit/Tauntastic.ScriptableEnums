@@ -8,7 +8,12 @@ namespace Tauntastic.ScriptableEnums.Editor
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            return ScriptableEnumUtils.GetCorrespondingScriptableEnumElement(property, fieldInfo);
+            if (property.isArray)
+            {
+                return new UnityEditor.UIElements.PropertyField(property);
+            }
+            
+            return new ScriptableEnumField(property, fieldInfo);
         }
     }
 }

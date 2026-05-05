@@ -12,7 +12,7 @@ namespace Tauntastic.ScriptableEnums.Editor
 {
     public class ScriptableEnumField : BaseField<string>
     {
-        private const string _POPUP_FIELD_NAME = "enum-field";
+        private const string _POPUP_FIELD_NAME = "popup-field";
         private const string _PING_BUTTON_NAME = "ping-button";
         private const string _OPEN_PROPERTY_EDITOR_BUTTON_NAME  = "open-property-editor-button";
 
@@ -177,7 +177,7 @@ namespace Tauntastic.ScriptableEnums.Editor
 
         private void RefreshOptions()
         {
-            var assets = GetAssetsOfType();
+            var assets = ScriptableEnumEditorUtils.GetAssetsOfType(_targetType);
 
             _nameToAssetMap.Clear();
             _assetToNameMap.Clear();
@@ -207,22 +207,9 @@ namespace Tauntastic.ScriptableEnums.Editor
             List<string> choices = _assetToNameMap.Values.ToList();
             choices.Insert(0, "<null>");
 
-            _popupField.choices = choices;
+                _popupField.choices = choices;
             _popupField.SetEnabled(_popupField.choices.Count > 1);
             _popupField.SetValueWithoutNotify(GetCurrentDisplayName(_property.objectReferenceValue));
-        }
-
-        private List<ScriptableObject> GetAssetsOfType()
-        {
-            var assets =
-                AssetDatabase
-                    .FindAssets($"t:{_targetType.Name}")
-                    .Select(AssetDatabase.GUIDToAssetPath)
-                    .Select(path => (ScriptableObject) AssetDatabase.LoadAssetAtPath(path, typeof(ScriptableObject)))
-                    .Where(obj => obj != null)
-                    .ToList();
-            
-            return assets;
         }
 
         private string GetCurrentDisplayName(Object obj)
@@ -235,7 +222,7 @@ namespace Tauntastic.ScriptableEnums.Editor
             if (_assetToNameMap.TryGetValue(currentSO, out string nameValue))
                 return nameValue;
 
-            var assets = GetAssetsOfType();
+            var assets = ScriptableEnumEditorUtils.GetAssetsOfType(_targetType);
             var assetsToNameMap = assets.ToDictionary(x => x, y => y.name);
             if (assetsToNameMap.TryGetValue(currentSO, out nameValue))
                 return nameValue;

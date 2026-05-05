@@ -12,7 +12,7 @@ namespace Tauntastic
     using ScriptableEnums;
 
     [Icon(_PATH_PREFIX + "/com.tauntastic.scriptableenums/Images/d_ScriptableEnum Icon.png")]
-    abstract public class ScriptableEnum : ScriptableObject
+    abstract public partial class ScriptableEnum : ScriptableObject
     {
         private const string _PATH_PREFIX =
 #if TAUNTASTIC_ASSETS_PACKAGE
@@ -62,36 +62,35 @@ namespace Tauntastic
 
         public static T[] GetAll<T>() where T : ScriptableEnum
         {
-            if (_allOptionsCache.TryGetValue(typeof(T), out ScriptableEnum[] cachedOptions))
-            {
-                return cachedOptions.Cast<T>().ToArray();
-            }
-
+            var type = typeof(T);
             T[] assets;
 #if UNITY_EDITOR
-            string[] guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
-            string[] paths = guids.Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            assets = paths.Select(AssetDatabase.LoadAssetAtPath<T>).ToArray();
+            assets = AssetDatabase
+                .FindAssets($"t:{type}")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(obj => obj != null)
+                .ToArray();
 #else
-            assets = Resources.LoadAll<T>("");
+            if (_allOptionsCache.TryGetValue(type, out var ses))
+                return ses.Cast<T>().ToArray();
+            assets = Resources.LoadAll("", type).Cast<T>().ToArray();
 #endif
-            _allOptionsCache[typeof(T)] = assets;
+            _allOptionsCache[type] = assets;
             return assets;
         }
 
-        public static ScriptableEnum[] GetAllOptions(Type type)
+        public static ScriptableEnum[] GetAll(Type type)
         {
-            if (_allOptionsCache.TryGetValue(type, out ScriptableEnum[] cachedOptions))
-            {
-                return cachedOptions;
-            }
-
             ScriptableEnum[] assets;
 #if UNITY_EDITOR
-            string[] guids = AssetDatabase.FindAssets("t:" + type.Name);
-            string[] paths = guids.Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            assets = paths.Select(path => AssetDatabase.LoadAssetAtPath(path, type)).Cast<ScriptableEnum>().ToArray();
+            assets = AssetDatabase
+                .FindAssets($"t:{type}")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<ScriptableEnum>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(obj => obj != null)
+                .ToArray();
 #else
+            if (_allOptionsCache.TryGetValue(type, out assets))
+                return assets;
             assets = Resources.LoadAll("", type).Cast<ScriptableEnum>().ToArray();
 #endif
             _allOptionsCache[type] = assets;
@@ -106,22 +105,26 @@ namespace Tauntastic
         public static ScriptableEnum GetByName(Type type, string textIdentifier)
         {
             textIdentifier = textIdentifier.Trim().ToLower();
-            var allScriptableEnums = GetAllOptions(type);
+            var allScriptableEnums = GetAll(type);
             var matchingEnums = allScriptableEnums.Where(x => x.DisplayText.Trim().ToLower() == textIdentifier)
                 .ToArray();
 
-            return matchingEnums.Length switch
+            switch (matchingEnums.Length)
             {
-                0 => throw new Exception($"No scriptable enum found for {textIdentifier}"),
-                > 1 => throw new Exception(
-                    $"Multiple scriptable enums found for {textIdentifier}, please specify a more specific name"),
-                _ => matchingEnums.FirstOrDefault()
-            };
+                case 0:
+                    Debug.LogWarning($"No scriptable enum found for {textIdentifier}");
+                    return null;
+                case > 1:
+                    Debug.LogWarning($"Multiple scriptable enums found for {textIdentifier}, please specify a more specific name");
+                    return null;
+                default:
+                    return matchingEnums.FirstOrDefault();
+            }
         }
 
         public static IEnumerable<ScriptableEnum> GetAllInstances(Type type)
         {
-            return GetAllOptions(type);
+            return GetAll(type);
         }
 
         public static void SetByName<T>(ref T se, string name) where T : ScriptableEnum
