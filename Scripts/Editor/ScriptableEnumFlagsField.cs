@@ -12,7 +12,7 @@ namespace Tauntastic.ScriptableEnums.Editor
 {
     public class ScriptableEnumFlagsField : BaseField<string>
     {
-        private static string _MASK_FIELD_NAME = "mask-field";
+        private const string _MASK_FIELD_NAME = "mask-field";
         
         private FieldInfo _fieldInfo;
         private SerializedProperty _property;
@@ -81,17 +81,16 @@ namespace Tauntastic.ScriptableEnums.Editor
                 throw new ArgumentException("Cannot find field info for property: " + property.propertyPath);
 
             _targetType = _fieldInfo.FieldType;
-
-            if (_targetType == null)
-                throw new ArgumentException("ScriptableEnumField can only be used with ScriptableObject properties.");
             
             if (_targetType.IsGenericType)
                 _targetType = _targetType.GetGenericArguments()[0];
 
+            if (_targetType == null)
+                throw new ArgumentException("ScriptableEnumField can only be used with ScriptableObject properties.");
+
             _maskField = this.Q<MaskField>(_MASK_FIELD_NAME);
             
-            if (property.boxedValue is not ScriptableEnum.Flags scriptableEnumFlags)
-                return;
+            if (property.boxedValue is not ScriptableEnum.Flags scriptableEnumFlags) return;
 
             RefreshOptions();
             
@@ -127,8 +126,7 @@ namespace Tauntastic.ScriptableEnums.Editor
             
             _maskField.TrackPropertyValue(property, callback =>
             {
-                if (callback.boxedValue is not ScriptableEnum.Flags sef) 
-                    return;
+                if (callback.boxedValue is not ScriptableEnum.Flags sef) return;
                 
                 indexes = array.Where(sef.Values.Contains).Select(x => stringList.IndexOf(x.name)).ToList();
                 mask = MaskUtils.GetMaskFromIndices(indexes, totalCount);
@@ -138,8 +136,7 @@ namespace Tauntastic.ScriptableEnums.Editor
 
         private void RefreshOptions()
         {
-            if (_property.boxedValue is not ScriptableEnum.Flags scriptableEnumFlags)
-                return;
+            if (_property.boxedValue is not ScriptableEnum.Flags scriptableEnumFlags) return;
             
             Type seType = scriptableEnumFlags.Type;
 

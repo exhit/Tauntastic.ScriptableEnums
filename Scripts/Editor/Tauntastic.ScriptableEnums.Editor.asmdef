@@ -2,7 +2,8 @@
     "name": "Tauntastic.ScriptableEnums.Editor",
     "rootNamespace": "Tauntastic.ScriptableEnums.Editor",
     "references": [
-        "GUID:12c314bd2eb4f3e4884743c1c8c7c995"
+        "GUID:12c314bd2eb4f3e4884743c1c8c7c995",
+        "GUID:08d04a46ae4b4c3418909957ff3087c1"
     ],
     "includePlatforms": [
         "Editor"

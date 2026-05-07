@@ -76,3 +76,7 @@ Test
 Test.meta
 Test/*
 Test/*.*
+Tests
+Tests/*
+Tests.meta
+Tests/*.*

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Serialization;
 
 namespace Tauntastic
 {
@@ -16,13 +17,14 @@ namespace Tauntastic
         [Serializable]
         public class Flags<T> : Flags where T : ScriptableEnum
         {
-            public List<T> TypedValuesSE = new();
+            [FormerlySerializedAs("TypedValuesSE")]
+            public List<T> TypedValues = new();
             public override Type Type => typeof(T);
 
             public override List<ScriptableEnum> Values
             {
-                get => TypedValuesSE.Cast<ScriptableEnum>().ToList();
-                set => TypedValuesSE = value.Cast<T>().ToList();
+                get => TypedValues.Cast<ScriptableEnum>().ToList();
+                set => TypedValues = value.Cast<T>().ToList();
             }
 
             #region IMPLICIT

@@ -14,6 +14,11 @@ namespace Tauntastic
     [Icon(_PATH_PREFIX + "/com.tauntastic.scriptableenums/Images/d_ScriptableEnum Icon.png")]
     abstract public partial class ScriptableEnum : ScriptableObject
     {
+#if UNITY_EDITOR
+        public bool PreventProjectWideDuplicates => true;
+#endif
+
+        
         private const string _PATH_PREFIX =
 #if TAUNTASTIC_ASSETS_PACKAGE
             "Assets/Tauntastic";

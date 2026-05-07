@@ -1,6 +1,6 @@
 {
   "name": "com.tauntastic.scriptableenums",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "displayName": "Tauntastic.ScriptableEnums",
   "description": "An utility that simplifies scriptable objects use",
   "unity": "2023.2",
