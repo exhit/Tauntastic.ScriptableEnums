@@ -59,12 +59,8 @@ namespace Tauntastic.ScriptableEnums.Editor
         {
             foreach (string importedAssetPath in importedAssets)
             {
-                // Load the asset
                 Object importedObject = AssetDatabase.LoadMainAssetAtPath(importedAssetPath);
-
-                if (importedObject is not ScriptableEnum { PreventProjectWideDuplicates: true } importedSE)
-                    continue;
-                
+                if (importedObject is not ScriptableEnum importedSE) continue;
                 importedSE.RenameProjectWideDuplicate(importedAssetPath, logSuccessfulRenames);
             }
         }

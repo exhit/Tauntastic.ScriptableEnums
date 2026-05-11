@@ -14,11 +14,6 @@ namespace Tauntastic
     [Icon(_PATH_PREFIX + "/com.tauntastic.scriptableenums/Images/d_ScriptableEnum Icon.png")]
     abstract public partial class ScriptableEnum : ScriptableObject
     {
-#if UNITY_EDITOR
-        public bool PreventProjectWideDuplicates => true;
-#endif
-
-        
         private const string _PATH_PREFIX =
 #if TAUNTASTIC_ASSETS_PACKAGE
             "Assets/Tauntastic";
@@ -26,35 +21,27 @@ namespace Tauntastic
             "Packages";
 #endif
 
-        [SerializeField]
-        [ScriptableEnumsDisable]
-        private string _displayText;
-
-        public string DisplayText
-        {
-            get => _displayText;
-            protected set => _displayText = value;
-        }
-
-
         protected virtual void Awake()
         {
-            DisplayText = name;
-        }
-
-        protected virtual void OnValidate()
-        {
-            DisplayText = name;
+            var type = GetType();
+            if (_allOptionsCache.TryGetValue(type, out var options))
+            {
+                if (options != null && !options.Contains(this))
+                {
+                    options.Add(this);
+                    _allOptionsCache[type] = options;
+                }
+            }
         }
 
         #region STATIC
 
-        private static readonly Dictionary<Type, ScriptableEnum[]> _allOptionsCache = new();
+        private static readonly Dictionary<Type, List<ScriptableEnum>> _allOptionsCache = new();
 
         public static implicit operator ScriptableEnum(string textIdentifier)
         {
             var allScriptableEnums = Resources.LoadAll<ScriptableEnum>("");
-            var matchingEnums = allScriptableEnums.Where(x => x.DisplayText.Contains(textIdentifier)).ToArray();
+            var matchingEnums = allScriptableEnums.Where(x => x.name.Contains(textIdentifier)).ToArray();
 
             return matchingEnums.Length switch
             {
@@ -65,38 +52,38 @@ namespace Tauntastic
             };
         }
 
-        public static T[] GetAll<T>() where T : ScriptableEnum
+        public static List<T> GetAll<T>() where T : ScriptableEnum
         {
             var type = typeof(T);
-            T[] assets;
+            List<T> assets;
 #if UNITY_EDITOR
             assets = AssetDatabase
                 .FindAssets($"t:{type}")
                 .Select(guid => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(obj => obj != null)
-                .ToArray();
+                .ToList();
 #else
             if (_allOptionsCache.TryGetValue(type, out var ses))
-                return ses.Cast<T>().ToArray();
-            assets = Resources.LoadAll("", type).Cast<T>().ToArray();
+                return ses.Cast<T>().ToList();
+            assets = Resources.LoadAll<T>("").ToList();
 #endif
-            _allOptionsCache[type] = assets;
+            _allOptionsCache[type] = assets.Cast<ScriptableEnum>().ToList();
             return assets;
         }
 
-        public static ScriptableEnum[] GetAll(Type type)
+        public static List<ScriptableEnum> GetAll(Type type)
         {
-            ScriptableEnum[] assets;
+            List<ScriptableEnum> assets;
 #if UNITY_EDITOR
             assets = AssetDatabase
                 .FindAssets($"t:{type}")
                 .Select(guid => AssetDatabase.LoadAssetAtPath<ScriptableEnum>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(obj => obj != null)
-                .ToArray();
+                .ToList();
 #else
             if (_allOptionsCache.TryGetValue(type, out assets))
                 return assets;
-            assets = Resources.LoadAll("", type).Cast<ScriptableEnum>().ToArray();
+            assets = Resources.LoadAll("", type).Cast<ScriptableEnum>().ToList();
 #endif
             _allOptionsCache[type] = assets;
             return assets;
@@ -111,7 +98,7 @@ namespace Tauntastic
         {
             textIdentifier = textIdentifier.Trim().ToLower();
             var allScriptableEnums = GetAll(type);
-            var matchingEnums = allScriptableEnums.Where(x => x.DisplayText.Trim().ToLower() == textIdentifier)
+            var matchingEnums = allScriptableEnums.Where(x => x.name.Trim().ToLower() == textIdentifier)
                 .ToArray();
 
             switch (matchingEnums.Length)

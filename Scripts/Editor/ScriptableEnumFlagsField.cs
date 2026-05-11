@@ -21,8 +21,8 @@ namespace Tauntastic.ScriptableEnums.Editor
         private MaskField _maskField;
         private Type _targetType;
         
-        protected ScriptableEnum[] array = { };
-        protected int totalCount => array.Length;
+        protected List<ScriptableEnum> list = new();
+        protected int totalCount => list.Count;
         protected List<string> stringList = new();
 
         public ScriptableEnumFlagsField(SerializedProperty property, FieldInfo fieldInfo) : this(property.displayName)
@@ -94,7 +94,7 @@ namespace Tauntastic.ScriptableEnums.Editor
 
             RefreshOptions();
             
-            var indexes = array.Where(scriptableEnumFlags.Values.Contains).Select(x => stringList.IndexOf(x.name)).ToList();
+            var indexes = list.Where(scriptableEnumFlags.Values.Contains).Select(x => stringList.IndexOf(x.name)).ToList();
             int mask = MaskUtils.GetMaskFromIndices(indexes, totalCount);
             
             _maskField.choices = stringList;
@@ -107,7 +107,7 @@ namespace Tauntastic.ScriptableEnums.Editor
                 switch (mask)
                 {
                     case -1:
-                        scriptableEnumFlags.Values = array.ToList();
+                        scriptableEnumFlags.Values = list.ToList();
                         break;
                     case 0:
                         scriptableEnumFlags.Values = new List<ScriptableEnum>();
@@ -115,7 +115,7 @@ namespace Tauntastic.ScriptableEnums.Editor
                     case >0:
                         indexes = MaskUtils.GetIndicesFromMask(mask, totalCount);
                         var chosenStrings = stringList.Where(x => indexes.Contains(stringList.IndexOf(x)));
-                        var chosenOptions = array.Where(x => chosenStrings.Contains(x.name));
+                        var chosenOptions = list.Where(x => chosenStrings.Contains(x.name));
                         scriptableEnumFlags.Values = chosenOptions.ToList();
                         break;
                 }
@@ -128,7 +128,7 @@ namespace Tauntastic.ScriptableEnums.Editor
             {
                 if (callback.boxedValue is not ScriptableEnum.Flags sef) return;
                 
-                indexes = array.Where(sef.Values.Contains).Select(x => stringList.IndexOf(x.name)).ToList();
+                indexes = list.Where(sef.Values.Contains).Select(x => stringList.IndexOf(x.name)).ToList();
                 mask = MaskUtils.GetMaskFromIndices(indexes, totalCount);
                 _maskField.SetValueWithoutNotify(mask);
             });
@@ -139,12 +139,8 @@ namespace Tauntastic.ScriptableEnums.Editor
             if (_property.boxedValue is not ScriptableEnum.Flags scriptableEnumFlags) return;
             
             Type seType = scriptableEnumFlags.Type;
-
-            array = ScriptableEnum.GetAll(seType);
-            var list = array.Where(x => x != null);
-            array = list.ToArray();
-            
-            stringList = array.Select(x => x.name.ToString()).ToList();
+            list = ScriptableEnum.GetAll(seType).Where(x => x != null).ToList();
+            stringList = list.Select(x => x.name.ToString()).ToList();
         }
     }
 }

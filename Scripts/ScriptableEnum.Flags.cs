@@ -17,7 +17,6 @@ namespace Tauntastic
         [Serializable]
         public class Flags<T> : Flags where T : ScriptableEnum
         {
-            [FormerlySerializedAs("TypedValuesSE")]
             public List<T> TypedValues = new();
             public override Type Type => typeof(T);
 
