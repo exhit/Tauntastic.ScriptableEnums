@@ -23,8 +23,7 @@ namespace Tauntastic.ScriptableEnums.Editor
         private PopupField<string> _popupField;
         private Type _targetType;
 
-        private readonly Dictionary<string, ScriptableObject> _nameToAssetMap = new();
-        private readonly Dictionary<ScriptableObject, string> _assetToNameMap = new();
+        private int _cacheVersion = -1;
 
         public ScriptableEnumField(SerializedProperty property, FieldInfo fieldInfo)
             : this(property.displayName)
@@ -37,13 +36,14 @@ namespace Tauntastic.ScriptableEnums.Editor
             RegisterCallback<AttachToPanelEvent>(_ =>
             {
                 Undo.undoRedoPerformed += RefreshOptions;
-                EditorApplication.projectChanged += RefreshOptions;
+                ScriptableEnumCache.Invalidated += RefreshOptions;
+                RefreshOptions();
             });
 
             RegisterCallback<DetachFromPanelEvent>(_ =>
             {
                 Undo.undoRedoPerformed -= RefreshOptions;
-                EditorApplication.projectChanged -= RefreshOptions;
+                ScriptableEnumCache.Invalidated -= RefreshOptions;
             });
         }
 
@@ -177,65 +177,30 @@ namespace Tauntastic.ScriptableEnums.Editor
 
         private void RefreshOptions()
         {
-            var assets = ScriptableEnumEditorUtils.GetAssetsOfType(_targetType);
+            if (_popupField == null || _property == null) return;
 
-            _nameToAssetMap.Clear();
-            _assetToNameMap.Clear();
+            ScriptableEnumCache.Entry entry = ScriptableEnumCache.Get(_targetType);
 
-            Dictionary<string, int> names = new();
-
-            // Build asset lists with duplicate tracking
-            foreach (ScriptableObject asset in assets)
+            if (_cacheVersion != ScriptableEnumCache.Version)
             {
-                string displayName = asset.name;
-                if (!names.TryAdd(displayName, 1))
-                    names[displayName]++;
+                _cacheVersion = ScriptableEnumCache.Version;
+                _popupField.choices = entry.Choices;
+                _popupField.SetEnabled(entry.Choices.Count > 1);
             }
 
-            // Assign unique names and track assets
-            foreach (ScriptableObject asset in assets)
-            {
-                string displayName = asset.name;
-
-                if (names[displayName] > 1)
-                    displayName += $" ({names[displayName]})";
-
-                _nameToAssetMap[displayName] = asset;
-                _assetToNameMap[asset] = displayName;
-            }
-
-            List<string> choices = _assetToNameMap.Values.ToList();
-            choices.Insert(0, "<null>");
-
-                _popupField.choices = choices;
-            _popupField.SetEnabled(_popupField.choices.Count > 1);
-            _popupField.SetValueWithoutNotify(GetCurrentDisplayName(_property.objectReferenceValue));
+            _popupField.SetValueWithoutNotify(entry.GetDisplayName(_property.objectReferenceValue as ScriptableObject));
         }
 
         private string GetCurrentDisplayName(Object obj)
         {
-            ScriptableObject currentSO = obj as ScriptableObject;
-            
-            if (currentSO == null)
-                return "<null>";
-
-            if (_assetToNameMap.TryGetValue(currentSO, out string nameValue))
-                return nameValue;
-
-            var assets = ScriptableEnumEditorUtils.GetAssetsOfType(_targetType);
-            var assetsToNameMap = assets.ToDictionary(x => x, y => y.name);
-            if (assetsToNameMap.TryGetValue(currentSO, out nameValue))
-                return nameValue;
-
-            Debug.Log("Value was deleted or not found in the map.");
-            return "<null>";
+            return ScriptableEnumCache.Get(_targetType).GetDisplayName(obj as ScriptableObject);
         }
 
         private void OnSelectionChanged(SerializedProperty property, string newValue)
         {
-            if (_nameToAssetMap.TryGetValue(newValue, out ScriptableObject asset))
+            if (ScriptableEnumCache.Get(_targetType).NameToAsset.TryGetValue(newValue, out ScriptableObject asset))
                 property.objectReferenceValue = asset;
-            else if (newValue == "<null>")
+            else if (newValue == ScriptableEnumCache.NullChoice)
                 property.objectReferenceValue = null;
             else
                 Debug.LogError("Error in selection change.");

@@ -33,8 +33,7 @@ namespace Tauntastic.ScriptableEnums.Editor
 
         public static bool IsExistingScriptableObjectCountAbove(this Type type, int threshold = _PREDEFINED_COUNT)
         {
-            var assets = GetAssetsOfType(type);
-            return assets.Count > threshold;
+            return AssetDatabase.FindAssets($"t:{type.FullName}").Length > threshold;
         }
 
         public static List<ScriptableObject> GetAssetsOfType(Type type)

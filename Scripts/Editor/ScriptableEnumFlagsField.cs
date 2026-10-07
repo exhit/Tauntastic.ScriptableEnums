@@ -35,13 +35,13 @@ namespace Tauntastic.ScriptableEnums.Editor
             RegisterCallback<AttachToPanelEvent>(_ =>
             {
                 Undo.undoRedoPerformed += RefreshOptions;
-                EditorApplication.projectChanged += RefreshOptions;
+                ScriptableEnumCache.Invalidated += RefreshOptions;
             });
 
             RegisterCallback<DetachFromPanelEvent>(_ =>
             {
                 Undo.undoRedoPerformed -= RefreshOptions;
-                EditorApplication.projectChanged -= RefreshOptions;
+                ScriptableEnumCache.Invalidated -= RefreshOptions;
             });
         }
         
@@ -139,8 +139,8 @@ namespace Tauntastic.ScriptableEnums.Editor
             if (_property.boxedValue is not ScriptableEnum.Flags scriptableEnumFlags) return;
             
             Type seType = scriptableEnumFlags.Type;
-            list = ScriptableEnum.GetAll(seType).Where(x => x != null).ToList();
-            stringList = list.Select(x => x.name.ToString()).ToList();
+            list = ScriptableEnumCache.Get(seType).Assets.OfType<ScriptableEnum>().ToList();
+            stringList = list.Select(x => x.name).ToList();
         }
     }
 }
