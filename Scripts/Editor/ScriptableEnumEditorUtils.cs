@@ -11,6 +11,7 @@ using Object = UnityEngine.Object;
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>Editor helpers for scriptable enums: finding assets of a type, checking asset counts, building the capped enum element and renaming project-wide duplicates.</summary>
     public static class ScriptableEnumEditorUtils
     {
         private const int _PREDEFINED_COUNT = 25;

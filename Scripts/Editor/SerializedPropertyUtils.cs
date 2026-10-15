@@ -2,6 +2,7 @@
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>SerializedProperty helpers used by the scriptable enum drawers.</summary>
     public static class SerializedPropertyUtils
     {
         public static bool IsPropertyInUnityObject(this SerializedProperty property)

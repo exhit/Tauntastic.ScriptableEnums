@@ -5,8 +5,10 @@ using UnityEngine.Serialization;
 
 namespace Tauntastic
 {
+    /// <summary>Nested flags types of <see cref="ScriptableEnum"/>: serializable multi-selections of enum assets.</summary>
     public partial class ScriptableEnum
     {
+        /// <summary>Non-generic base of the serialized multi-selection of ScriptableEnum values, exposing the enum type and the selected values.</summary>
         [Serializable]
         abstract public class Flags
         {
@@ -14,6 +16,7 @@ namespace Tauntastic
             abstract public List<ScriptableEnum> Values { get; set; }
         }
 
+        /// <summary>Serialized multi-selection of ScriptableEnum assets of type T, convertible to a list of T, a list of ScriptableEnum or the enum Type.</summary>
         [Serializable]
         public class Flags<T> : Flags where T : ScriptableEnum
         {

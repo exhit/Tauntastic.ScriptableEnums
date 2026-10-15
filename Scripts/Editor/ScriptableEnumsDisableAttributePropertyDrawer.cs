@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>Property drawer that disables the field once it is laid out.</summary>
     [CustomPropertyDrawer(typeof(ScriptableEnumsDisableAttribute), true)]
     public class ScriptableEnumsDisableAttributePropertyDrawer : PropertyDrawer
     {

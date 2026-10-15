@@ -11,6 +11,7 @@ namespace Tauntastic
 {
     using ScriptableEnums;
 
+    /// <summary>Base class for enums made of ScriptableObject assets: each asset is a value identified by its name, with static lookups by type and name that use the AssetDatabase in the Editor and Resources in builds.</summary>
     [Icon(_PATH_PREFIX + "/com.tauntastic.scriptableenums/Images/d_ScriptableEnum Icon.png")]
     abstract public partial class ScriptableEnum : ScriptableObject
     {

@@ -5,6 +5,7 @@ using Object = UnityEngine.Object;
 
 namespace Tauntastic
 {
+    /// <summary>Extension helpers for assigning ScriptableEnum fields from any object when they are null or have the wrong name.</summary>
     public static class ScriptableEnumUtils
     {
         public static bool TrySetIfNullOrWrongName<T>(this object caller, ref T se, string name) where T : ScriptableEnum

@@ -1,162 +1,74 @@
-# Tauntastic.ScriptableEnum
+# Tauntastic.ScriptableEnums
 
-`ScriptableEnums` is a Unity package that provides a flexible and extensible way to create and manage enumerations as ScriptableObjects. This allows for dynamic and customizable enums that can be easily modified and extended without requiring code changes.
+Enums as **ScriptableObject assets**. Each value is an asset, so designers can add, rename and extend values without recompiling, and values can carry their own data and methods.
+
+- Package: `com.tauntastic.scriptableenums` (v1.4.0, Unity 2023.2+)
+- Assemblies: `Tauntastic.ScriptableEnums` (runtime), `Tauntastic.ScriptableEnums.Editor` (drawers, duplicate guard)
+- Namespace: `Tauntastic` (`ScriptableEnum`, attributes), `Tauntastic.ScriptableEnums` (helpers)
+- Dependencies: none
+- AI agents: see [ARTIFICIAL_INTELLIGENCE_README.md](ARTIFICIAL_INTELLIGENCE_README.md)
 
 ## Installation
 
-Install via the package manager git url using the latest version.
 ```
 git+https://github.com/exhit/Tauntastic.ScriptableEnums.git
 ```
 
-## Features
+## Creating an enum
 
-- **Dynamic Enums**: Create enums as ScriptableObjects, allowing for runtime modifications.
-- **Editor Integration**: Full support for Unity's Editor, including custom property drawers and UI elements.
-- **Type-Safe**: Generic support for type-safe enums.
-- **Searchable**: Easily search and filter enums in the Unity Editor.
-- **Customizable Display Text**: Each enum value can have a custom display text.
-- **Ping and Open in Editor**: Quickly locate and edit enum assets directly from the Inspector.
-
-## Installation
-
-1. Download the package or clone the repository.
-2. Place the `ScriptableEnums` folder into your Unity project's `Assets` directory.
-3. Ensure the package is imported correctly in Unity.
-
-## Usage
-
-### Creating a ScriptableEnum
-
-1. Create a new class that inherits from `ScriptableEnum` or `ScriptableEnum<T>`.
-2. Define your enum values as ScriptableObject instances in the Unity Editor.
+Derive from the abstract `ScriptableEnum`, add a `CreateAssetMenu`, then create one asset per value. The **asset name** is the value's identifier.
 
 ```csharp
+using Tauntastic;
 using UnityEngine;
-using Tauntastic.ScriptableEnums;
 
-[CreateAssetMenu(menuName = "Enums/ColorEnum")]
-public class ColorEnum : ScriptableEnum
+[CreateAssetMenu(menuName = "Enums/Rarity")]
+public class Rarity : ScriptableEnum
 {
-    // Custom properties or methods can be added here
+    public Color Color = Color.white;   // values can carry data
 }
 ```
-### Using ScriptableEnum<T> class
+
+## Using it in fields
+
+A `ScriptableEnum` field is drawn as a searchable dropdown of all assets of that type (with ping / open buttons).
 
 ```csharp
-public class Example : MonoBehaviour
+public class Loot : MonoBehaviour
 {
-    public ColorEnum color;
+    public Rarity Rarity;                       // dropdown of Rarity assets
+}
 
-    private void OnValidate()
-    {
-        // Access all options of the enum
-        var allColors = ColorEnum.AllOptions;
-
-        // Get a specific enum value by name
-        var redColor = ColorEnum.GetByName("Red");
-
-        // Use the enum value
-        Debug.Log($"Selected color: {color.DisplayText}");
-    }
+[CreateAssetMenu]
+public class LootTable : ScriptableObject
+{
+    [ScriptableEnum] public Rarity Minimum;     // force the same drawer on a plain ScriptableObject field
+    public ScriptableEnum.Flags<Rarity> Allowed = new(); // multi-select ("flags")
 }
 ```
-### Using [ScriptableEnumAttribute] Attribute
 
-You can use the [ScriptableEnumAttribute] attribute to directly reference a ScriptableEnum in your MonoBehaviour or ScriptableObject.
+- `[ScriptableEnum]` - draw any ScriptableObject field as an enum-style dropdown.
+- `[ScriptableEnumsDisable]` - disable / grey out a ScriptableEnum field.
+- `ScriptableEnum.Flags<T>` - serialized multi-selection; `TypedValues` (`List<T>`), `Values`, `Type`, implicit conversions to `List<T>`, `List<ScriptableEnum>` and `Type`.
+
+## Looking values up
 
 ```csharp
-public class PlayerSettings : MonoBehaviour
-{
-    [ScriptableEnum]
-    public ColorEnum playerColor;
-
-    private void OnValidate()
-    {
-        Debug.Log($"Player color: {playerColor.DisplayText}");
-    }
-}
+List<Rarity> all = ScriptableEnum.GetAll<Rarity>();
+Rarity epic     = ScriptableEnum.GetByName<Rarity>("Epic");   // case-insensitive, trimmed; null + warning if 0 or >1 match
+ScriptableEnum.SetByName(ref rarity, "Rare");
+ScriptableEnum.TrySetIfNullOrWrongName(ref rarity);           // assign the first asset when null
+ScriptableEnum.TrySetIfNullOrWrongName(ref rarity, "Common"); // assign by name when null or a different name
 ```
 
+Also: `GetAll(Type)`, `GetByName(Type, string)`, `GetAllInstances(Type)`, collection / dictionary overloads of `TrySetIfNullOrWrongName`, the extension `this.TrySetIfNullOrWrongName(ref value, name)` (`ScriptableEnumUtils`), and `implicit operator ScriptableEnum(string)` (searches `Resources`, throws on 0 or >1 match).
 
-### Example: Using ScriptableEnum with a ScriptableObject
+## Editor vs. builds
 
-```csharp
-using UnityEngine;
-using Tauntastic.ScriptableEnums;
+- In the **Editor**, `GetAll` uses `AssetDatabase.FindAssets`, so assets can live anywhere.
+- In **builds**, it uses `Resources.LoadAll`, so the asset files must be inside a `Resources` folder (or be otherwise included) to be found at runtime. Results are cached per type.
+- `PreventProjectWideDuplicateScriptableEnumPostProcessor` watches imported assets and renames project-wide duplicates (same name, same enum type) so identifiers stay unique.
 
-[CreateAssetMenu(fileName = "NewColorSettings", menuName = "Settings/ColorSettings")]
-public class ColorSettings : ScriptableObject
-{
-    [ScriptableEnum]
-    public ColorEnum ColorSO;
-
-    private void OnValidate()
-    {
-        Debug.Log($"Selected color: {ColorSO.DisplayText}");
-    }
-}
-```
-
-## API Reference
-
-### ScriptableEnum
-- **string DisplayText { get; }:** Gets or sets the display text for the enum value.
-
-- **GetAll\<T>():** Returns all instances of a specific ScriptableEnum type.
-
-- **GetAll(Type type):** Returns all instances of a specific ScriptableEnum type by Type.
-
-- **GetByName\<T>(string textIdentifier):** Retrieves an enum instance by its display name.
-
-- **GetByName(Type type, string textIdentifier):** Retrieves an enum instance by its display name.
-
-### Attributes
-- **ScriptableEnumAttribute:** Marks a ScriptableObject field or property to be drawn as ScriptableEnum.
-
-## Examples
-### Example 1: Creating a Color Enum
-```csharp
-[CreateAssetMenu(fileName = "NewColorEnum", menuName = "Enums/ColorEnum")]
-public class ColorEnum : ScriptableEnum<ColorEnum>
-{
-    // Custom properties or methods can be added here
-}
-```
-
-### Example 2: Using ScriptableEnum in a MonoBehaviour
-```csharp
-public class Player : MonoBehaviour
-{
-    public ColorEnum playerColor;
-
-    private void OnValidate()
-    {
-        Debug.Log($"Player color: {playerColor.DisplayText}");
-    }
-}
-```
-### Example 3: Using [ScriptableEnum] with a ScriptableObject
-```csharp
-[CreateAssetMenu(fileName = "NewColorSettings", menuName = "Settings/ColorSettings")]
-public class ColorSettings : ScriptableObject
-{
-    [ScriptableEnum]
-    public ColorEnum ColorSO;
-
-    private void OnValidate()
-    {
-        Debug.Log($"Selected color: {ColorSO.DisplayText}");
-    }
-}
-```
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
 
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any bugs, features, or improvements.
-
-## Support
-If you encounter any issues or have questions, please open an issue on the GitHub repository.
-
-Note: This package is designed for Unity 2023.2 LTS or later. Ensure your project meets the minimum requirements.
+MIT - see [LICENSE](LICENSE).

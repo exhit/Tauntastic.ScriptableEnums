@@ -5,14 +5,12 @@ using UnityEngine;
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
-    /// <summary>
-    /// Shared per-type cache of ScriptableObject assets used by the scriptable enum drawers.
-    /// Invalidated only when assets are actually imported, moved or deleted.
-    /// </summary>
+    /// <summary>Shared per-type cache of ScriptableObject assets and their display names used by the scriptable enum drawers, invalidated when assets are imported, deleted or moved.</summary>
     public static class ScriptableEnumCache
     {
         public const string NullChoice = "<null>";
 
+        /// <summary>Cached assets, choices and name lookups for one ScriptableObject type.</summary>
         public class Entry
         {
             public List<ScriptableObject> Assets;
@@ -86,6 +84,7 @@ namespace Tauntastic.ScriptableEnums.Editor
             return entry;
         }
 
+        /// <summary>Clears the cache whenever assets are imported, deleted or moved.</summary>
         private class Postprocessor : AssetPostprocessor
         {
             private static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved,

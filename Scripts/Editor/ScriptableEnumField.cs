@@ -10,6 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>UI Toolkit field that picks a single ScriptableEnum asset from a dropdown.</summary>
     public class ScriptableEnumField : BaseField<string>
     {
         private const string _POPUP_FIELD_NAME = "popup-field";

@@ -10,6 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>UI Toolkit field that picks several ScriptableEnum assets with a mask-style dropdown.</summary>
     public class ScriptableEnumFlagsField : BaseField<string>
     {
         private const string _MASK_FIELD_NAME = "mask-field";

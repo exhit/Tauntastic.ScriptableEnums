@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>Property drawer that draws ScriptableEnum fields with a <see cref="ScriptableEnumField"/>.</summary>
     [CustomPropertyDrawer(typeof(ScriptableEnum), true)]
     public class ScriptableEnumPropertyDrawer : PropertyDrawer
     {

@@ -2,6 +2,7 @@
 
 namespace Tauntastic.ScriptableEnums.Editor
 {
+    /// <summary>Converts between lists of selected option indices and bit masks.</summary>
     public static class MaskUtils
     {
         public static int GetMaskFromIndices(List<int> indices, int totalOptionCount)

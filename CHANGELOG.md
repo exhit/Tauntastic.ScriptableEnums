@@ -19,3 +19,9 @@
 - Removed `ScriptableEnum<T>` class
 - Unified `GetByName()`logic
 - Added the same `_PREDEFINED_COUNT` to `countThreshold` in two methods
+
+## 1.4.0
+
+- Rewrote README.md and added ARTIFICIAL_INTELLIGENCE_README.md, a paragraph that explains to AI agents how to use the package
+- Added an editor class that injects that paragraph into Assets/ARTIFICIAL_INTELLIGENCE_README.md (created if missing, unchanged if the identical paragraph exists, replaced if an older paragraph of this package exists)
+- Added XML summary descriptors to every class, struct, interface and enum

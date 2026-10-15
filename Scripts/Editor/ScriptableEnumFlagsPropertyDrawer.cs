@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 namespace Tauntastic.ScriptableEnums.Editor
 {
     
+    /// <summary>Property drawer that draws a ScriptableEnum.Flags value with a <see cref="ScriptableEnumFlagsField"/>.</summary>
     [CustomPropertyDrawer(typeof(ScriptableEnum.Flags), true)]
     public class ScriptableEnumFlagsPropertyDrawer : PropertyDrawer
     {
