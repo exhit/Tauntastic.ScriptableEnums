@@ -2,7 +2,7 @@
 
 Enums as **ScriptableObject assets**. Each value is an asset, so designers can add, rename and extend values without recompiling, and values can carry their own data and methods.
 
-- Package: `com.tauntastic.scriptableenums` (v1.4.0, Unity 2023.2+)
+- Package: `com.tauntastic.scriptableenums` (v1.5.0, Unity 2023.2+)
 - Assemblies: `Tauntastic.ScriptableEnums` (runtime), `Tauntastic.ScriptableEnums.Editor` (drawers, duplicate guard)
 - Namespace: `Tauntastic` (`ScriptableEnum`, attributes), `Tauntastic.ScriptableEnums` (helpers)
 - Dependencies: none

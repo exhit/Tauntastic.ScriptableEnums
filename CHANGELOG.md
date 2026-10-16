@@ -25,3 +25,7 @@
 - Rewrote README.md and added ARTIFICIAL_INTELLIGENCE_README.md, a paragraph that explains to AI agents how to use the package
 - Added an editor class that injects that paragraph into Assets/ARTIFICIAL_INTELLIGENCE_README.md (created if missing, unchanged if the identical paragraph exists, replaced if an older paragraph of this package exists)
 - Added XML summary descriptors to every class, struct, interface and enum
+
+## 1.5.0
+
+- The AI README injector now lives in the package's Editor folder (Scripts/Editor/AI) under an Editor-only assembly definition and no longer needs a UNITY_EDITOR wrapper
